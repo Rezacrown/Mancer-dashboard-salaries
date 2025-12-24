@@ -2,25 +2,20 @@
 import { useState } from "react";
 import { Bell, LogOut, Menu, Search } from "lucide-react";
 
-import { useGetAuthenticated } from "@/libs/hooks/useGetAuthenticated";
-import { useRouter } from "next/navigation";
+import { useWallet } from "@/libs/hooks/useWallet";
+import { useMenuStore } from "@/libs/stores/menu-store";
 
 const Header = () => {
-  const router = useRouter();
+  const { disconnect, chain, isConnected: isAuthenticated } = useWallet();
 
-  const {
-    authenticated: isAuthenticated,
-    disconnect,
-    chain,
-  } = useGetAuthenticated();
-
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { sidebarIsOpen, setSidebarOpen } = useMenuStore();
 
   return (
     <header className="h-16 bg-gray-100 border-b border-gray-200 flex items-center justify-between px-6 lg:px-8">
       <div className="flex items-center gap-4">
         <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
+          onClick={() => setSidebarOpen(!sidebarIsOpen)}
           className="p-2 hover:bg-gray-100 rounded-lg md:hidden"
         >
           <Menu size={20} />

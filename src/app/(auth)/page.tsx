@@ -1,13 +1,29 @@
 "use client";
-import { useGetAuthenticated } from "@/libs/hooks/useGetAuthenticated";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { CheckCircle2, ShieldCheck, Zap } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { CheckCircle2, ShieldCheck, Zap } from "lucide-react";
+
+import { redirect, useRouter } from "next/navigation";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+
+import { useWallet } from "@/libs/hooks/useWallet";
+import { wagmiConfig } from "@/libs/Provider";
 
 export default function AuthPage() {
-  const router = useRouter();
-  const { authenticated, address } = useGetAuthenticated();
+  const { isConnected, status, chainId } = useWallet();
+
+  const [mounted, setMounted] = useState<boolean>(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return;
+
+  if (status == "reconnecting" || status == "connecting") return;
+
+  if (status == "connected" && mounted) {
+    redirect("/me");
+  }
 
   return (
     <div className="min-h-screen flex bg-white font-sans overflow-hidden">
@@ -132,37 +148,27 @@ export default function AuthPage() {
               chain,
             }) => {
               const ready = mounted && authenticationStatus !== "loading";
-              const connected =
-                ready &&
-                account &&
-                chain &&
-                (!authenticationStatus ||
-                  authenticationStatus === "authenticated");
+              const righNetwork = chain?.id == wagmiConfig.chains[0].id;
+              const connected = isConnected && righNetwork;
 
-              if (!connected)
-                return (
-                  <button
-                    disabled={connected}
-                    onClick={() => openConnectModal()}
-                    className={`w-full p-5 rounded-2xl border-2 flex items-center justify-between transition-all duration-200 group relative overflow-hidden border-gray-200 bg-white hover:border-primary/30 hover:shadow-xl hover:shadow-red-100/50 hover:-translate-y-1 text-gray-900 hover:text-primary
+              return (
+                <button
+                  disabled={connected}
+                  onClick={() => openConnectModal()}
+                  className={`w-full p-5 rounded-2xl border-2 flex items-center justify-between transition-all duration-200 group relative overflow-hidden border-gray-200 bg-white hover:border-primary/30 hover:shadow-xl hover:shadow-red-100/50 hover:-translate-y-1 text-gray-900 hover:text-primary
                 hover:bg-red-50/50 shadow-inner 
                `}
-                  >
-                    <div className="flex items-center gap-5 relative z-10 mx-auto">
+                >
+                  <div className="flex items-center gap-5 relative z-10 mx-auto">
+                    {!isConnected ? (
                       <h3 className=" font-bold text-xl lg:text-2xl ">
                         Connect Wallet
                       </h3>
-                    </div>
-                  </button>
-                );
-
-              return (
-                <div
-                  className="w-full p-5 rounded-2xl border-2 flex items-center justify-between transition-all duration-200 group relative overflow-hidden bg-white border-primary/30 shadow-xl shadow-red-100/50 hover:-translate-y-1 text-primary
-                hover:bg-red-50/50 text-center"
-                >
-                  <h3 className="mx-auto font-semibold"> Redirect...</h3>
-                </div>
+                    ) : (
+                      <h3 className="mx-auto font-semibold"> Redirect...</h3>
+                    )}
+                  </div>
+                </button>
               );
             }}
           />

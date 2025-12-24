@@ -18,11 +18,11 @@ import {
   TRANSACTIONS,
   WALLET_ASSETS,
 } from "@/constants/Mock";
-import { useGetAuthenticated } from "@/libs/hooks/useGetAuthenticated";
+import { useWallet } from "@/libs/hooks/useWallet";
 import { formatAddress } from "@/libs/utils";
 
 const EmployeeDashboardPage = () => {
-  const { address, openAccountModal } = useGetAuthenticated();
+  const { address, openAccountModal } = useWallet();
 
   const [streamedBalance, setStreamedBalance] = useState(11377.68);
   const [withdrawable, setWithdrawable] = useState(11120.92);
@@ -52,28 +52,30 @@ const EmployeeDashboardPage = () => {
         <Card className="lg:col-span-1 relative overflow-hidden flex flex-col justify-between">
           <div className="text-center mt-4 mb-6">
             <div className="relative w-48 h-48 mx-auto">
-              <svg className="w-full h-full transform rotate-135">
-                <circle
-                  cx="50%"
-                  cy="50%"
-                  r="40%"
-                  stroke="#f3f4f6"
-                  strokeWidth="12"
-                  fill="none"
-                  strokeDasharray="251 251"
-                />
-                <circle
-                  cx="50%"
-                  cy="50%"
-                  r="40%"
-                  stroke="#F9140D"
-                  strokeWidth="12"
-                  fill="none"
-                  strokeDasharray="180 251"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <div className="">
+                <svg className="w-full h-full transform rotate-135">
+                  <circle
+                    cx="50%"
+                    cy="50%"
+                    r="40%"
+                    stroke="#f3f4f6"
+                    strokeWidth="12"
+                    fill="none"
+                    strokeDasharray="251 251"
+                  />
+                  <circle
+                    cx="50%"
+                    cy="50%"
+                    r="40%"
+                    stroke="#F9140D"
+                    strokeWidth="12"
+                    fill="none"
+                    strokeDasharray="180 251"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+              <div className=" absolute inset-0 flex flex-col items-center justify-center">
                 <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center text-white mb-2 shadow-md">
                   <span className="font-bold text-xs">T</span>
                 </div>
