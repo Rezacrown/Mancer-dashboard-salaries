@@ -5,6 +5,8 @@ import SidebarItem from "./SidebarItem";
 
 import {
   Briefcase,
+  Copy,
+  CopyCheck,
   FileText,
   Home,
   Menu,
@@ -25,6 +27,7 @@ import { useWallet } from "@/libs/hooks/useWallet";
 import { useMenuStore } from "@/libs/stores/menu-store";
 import { useWindowWidth } from "@/libs/hooks/useWindowWidth";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { Address } from "viem";
 
 const Sidebar = () => {
   const { address } = useWallet();
@@ -34,11 +37,24 @@ const Sidebar = () => {
 
   const { sidebarIsOpen, setSidebarOpen } = useMenuStore();
 
+  const [copied, setCopied] = useState(false);
+
   // here
   const isEmployer = false;
 
   const getActiveMenu = (path: string): boolean => {
     return pathname == path;
+  };
+
+  const handleCopyAddress = async (addr: Address) => {
+    try {
+      await window.navigator.clipboard.writeText(addr);
+      setCopied(true);
+    } finally {
+      setTimeout(() => {
+        setCopied(false);
+      }, 3000);
+    }
   };
 
   const navigateTo = (path: string) => {
@@ -86,8 +102,16 @@ const Sidebar = () => {
           {isOpen && (
             <div className="overflow-hidden">
               <p className="text-sm font-bold truncate">{USER_PROFILE?.name}</p>
-              <p className="text-xs text-gray-500 uppercase font-semibold mt-0.5">
+              <p className="text-xs flex text-gray-500 uppercase font-semibold mt-0.5">
                 {address && formatAddress(address)}
+                {copied ? (
+                  <CopyCheck className="size-4 mx-2 text-primary" />
+                ) : (
+                  <Copy
+                    onClick={() => handleCopyAddress(address!)}
+                    className="size-4 mx-2 cursor-pointer hover:text-primary transition-all"
+                  />
+                )}
               </p>
             </div>
           )}
