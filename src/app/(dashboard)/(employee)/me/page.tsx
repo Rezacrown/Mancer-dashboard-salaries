@@ -2,6 +2,7 @@ import Top_grid from "@/modules/me/top-grid";
 import Wallet_balance from "@/modules/me/wallet-balance";
 import TransactionSection from "@/modules/me/transaction";
 import PageT_title from "@/modules/me/page-title";
+import List_streaming from "@/modules/me/list-streaming";
 
 const EmployeeDashboardPage = async () => {
   const streamedBalance = 11377.68;
@@ -14,6 +15,8 @@ const EmployeeDashboardPage = async () => {
 
       {/* Top Grid */}
       <Top_grid streamedBalance={streamedBalance} withdrawable={withdrawable} />
+
+      <List_streaming />
 
       {/* Wallet Balance Section */}
       <Wallet_balance />

@@ -1,8 +1,11 @@
+"use client";
 import Badge from "@/components/shared/Badge";
 import Card from "@/components/shared/Card";
-import { EMPLOYEE_STREAM_DATA } from "@/constants/Mock";
 import { Briefcase, FileText, Copy } from "lucide-react";
-import React from "react";
+
+import { EMPLOYEE_STREAM_DATA } from "@/constants/Mock";
+import { useEmployeeStreamDetail } from "@/libs/services/employee";
+import { useStreamStore } from "@/libs/stores/stream-store";
 
 interface Props {
   streamedBalance: number;
@@ -10,6 +13,12 @@ interface Props {
 }
 
 export default function Top_grid({ streamedBalance, withdrawable }: Props) {
+  const { activeStreamId } = useStreamStore();
+  const streamId = activeStreamId || 0n; // Fallback to 1n if no active stream is selected
+  const { status, streamDetail } = useEmployeeStreamDetail(streamId);
+
+  console.log(streamDetail);
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Gauge Card */}
@@ -44,7 +53,7 @@ export default function Top_grid({ streamedBalance, withdrawable }: Props) {
                 <span className="font-bold text-xs">T</span>
               </div>
               <h2 className="text-2xl font-bold text-gray-900">
-                {streamedBalance.toLocaleString("en-US", {
+                {streamDetail?.balance.toLocaleString("en-US", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
@@ -69,7 +78,7 @@ export default function Top_grid({ streamedBalance, withdrawable }: Props) {
                 <p className="font-semibold">Employee Contract Mantle</p>
               </div>
             </div>
-            <Badge status="Active" />
+            <Badge status={Boolean(status) ? "Active" : "Voided"} />
           </div>
 
           <button className="w-full py-3 bg-[#F9140D] hover:bg-red-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-red-200 active:scale-95">
@@ -183,6 +192,20 @@ export default function Top_grid({ streamedBalance, withdrawable }: Props) {
                   className="text-gray-400 cursor-pointer hover:text-[#F9140D]"
                 />
               </div>
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-xs text-gray-400 uppercase">Sender</p>
+              <p className="font-medium text-sm text-gray-700">
+                {EMPLOYEE_STREAM_DATA.sender}
+              </p>
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-xs text-gray-400 uppercase">Recepient</p>
+              <p className="font-medium text-sm text-gray-700">
+                {EMPLOYEE_STREAM_DATA.recipient}
+              </p>
             </div>
           </div>
         </Card>
