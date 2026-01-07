@@ -246,7 +246,7 @@ export const useEmployeeStreamDetail = (streamId: bigint) => {
 
   return {
     streamDetail,
-    withdrawableAmount: withdrawableAmount || 0,
+    withdrawableAmount: withdrawableAmount || 0n,
     withdrawableAmountFormated: withdrawableAmountFormated,
     balance: balance || null,
     balanceFormated: streamDetail?.balanceFormated,
