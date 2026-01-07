@@ -5,6 +5,7 @@ interface AccountingProps {
   ratePerMonth: number;
   debt: number;
   withdrawn: number;
+  withdrawnFormated: string;
   withdrawableAmountFormated: string;
   tokenSymbol: string;
 }
@@ -13,6 +14,7 @@ export default function AccountingCard({
   ratePerMonth,
   debt,
   withdrawn,
+  withdrawnFormated,
   withdrawableAmountFormated,
   tokenSymbol,
 }: AccountingProps) {
@@ -64,7 +66,7 @@ export default function AccountingCard({
             </span>
           </div>
           <p className="text-lg font-bold">
-            {withdrawn.toLocaleString("en-US", {
+            {Number(withdrawnFormated).toLocaleString("en-US", {
               minimumFractionDigits: 2,
             })}{" "}
             <span className="text-xs text-gray-400 font-normal">

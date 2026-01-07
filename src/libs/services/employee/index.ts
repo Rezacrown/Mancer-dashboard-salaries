@@ -9,6 +9,7 @@ export { useGetTokenDecimals } from "./useGetTokenDecimals";
 export { useGetEmployeeStreams } from "./useGetEmployeeStreams";
 export { useEmployeeStreamDetail } from "./useEmployeeStreamDetail";
 export { useWithdrawSalary } from "./useWithdrawSalary";
+export { useGetWithdrawnAmount } from "./useGetWithdrawnAmount";
 
 // Re-export types
 export type { TransactionHistory } from "./useGetRecentTransactions";

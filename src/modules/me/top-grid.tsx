@@ -1,7 +1,10 @@
 "use client";
 import Card from "@/components/shared/Card";
 
-import { useEmployeeStreamDetail } from "@/libs/services/employee";
+import {
+  useEmployeeStreamDetail,
+  useGetWithdrawnAmount,
+} from "@/libs/services/employee";
 import { useStreamStore } from "@/libs/stores/stream-store";
 import { useWallet } from "@/libs/hooks";
 import { formatAddress } from "@/libs/utils";
@@ -10,22 +13,31 @@ import { formatAddress } from "@/libs/utils";
 import GaugeCard from "./gauge-card";
 import AccountingCard from "./accounting-card";
 import OverviewCard from "./overview-card";
+import { formatUnits } from "viem";
 
 export default function Top_grid() {
   const { activeStreamId } = useStreamStore();
   const streamId = activeStreamId || 0n; // Fallback to 0n if no active stream is selected
+
   const {
     streamDetail,
     tokenSymbol,
     ratePerMonth,
     streamStatus,
-    loading,
-    error,
+    loading: streamDetailLoading,
+    error: streamDetailError,
     withdrawableAmount,
     withdrawableAmountFormated,
     balance,
     balanceFormated,
   } = useEmployeeStreamDetail(streamId);
+
+  const {
+    withdrawnAmount,
+    withdrawnAmountFormated,
+    loading: withdrawnAmountLoading,
+    error: withdrawnAmountError,
+  } = useGetWithdrawnAmount(streamId);
 
   const { address: recepientAddress } = useWallet();
 
@@ -47,13 +59,10 @@ export default function Top_grid() {
 
   // Menghitung debt dan withdrawn berdasarkan data dari hook
   const debt = Number(balance) - Number(withdrawableAmount);
-  const withdrawn =
-    balance && withdrawableAmount
-      ? Number(balance) - Number(withdrawableAmount)
-      : 0;
 
-  // Loading state
-  if (loading) {
+  // Loading state - gabungan dari stream detail dan withdrawn amount
+  const isLoading = streamDetailLoading || withdrawnAmountLoading;
+  if (isLoading) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-1 flex items-center justify-center h-96">
@@ -72,8 +81,9 @@ export default function Top_grid() {
     );
   }
 
-  // Error state
-  if (error) {
+  // Error state - gabungan dari stream detail dan withdrawn amount
+  const hasError = streamDetailError || withdrawnAmountError;
+  if (hasError) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-1 flex items-center justify-center h-96">
@@ -147,7 +157,8 @@ export default function Top_grid() {
         <AccountingCard
           ratePerMonth={ratePerMonth}
           debt={debt}
-          withdrawn={withdrawn}
+          withdrawn={Number(withdrawnAmount)}
+          withdrawnFormated={withdrawnAmountFormated}
           withdrawableAmountFormated={withdrawableAmountFormated || "0"}
           tokenSymbol={tokenSymbol}
         />
