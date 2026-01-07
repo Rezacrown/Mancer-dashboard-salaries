@@ -51,7 +51,7 @@ export interface EmployeeStream {
  *   - error: Pesan error jika terjadi kesalahan
  *   - refetch: Fungsi untuk memuat ulang data
  */
-export const useGetEmployeeStreams = (address: Address) => {
+export const useGetEmployeeStreams = (address: Address, limit: number = 5) => {
   const publicClient = usePublicClient();
   const [streams, setStreams] = useState<EmployeeStream[]>([]);
   const [loading, setLoading] = useState(false);
@@ -156,7 +156,7 @@ export const useGetEmployeeStreams = (address: Address) => {
         })
       );
 
-      setStreams(enrichedStreams);
+      setStreams(enrichedStreams.slice(0, limit));
     } catch (err) {
       console.error("Error fetching employee streams:", err);
       setError("Gagal mengambil data stream. Silakan coba lagi.");

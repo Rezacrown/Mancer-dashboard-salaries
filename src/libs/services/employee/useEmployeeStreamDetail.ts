@@ -16,12 +16,14 @@ import { CONFIG } from "@/constants/config";
 import { useState } from "react";
 import { Address, formatUnits } from "viem";
 import { useReadContract } from "wagmi";
+import { useGetTokenSymbol } from "./useGetTokenSymbol";
 
 /**
  * Interface untuk detail stream yang lengkap
  */
 export interface StreamDetail {
   balance: bigint; // Sisa balance dalam stream
+  balanceFormated: string; // formated Sisa balance dalam stream
   ratePerSecond: bigint; // Rate aliran gaji per detik
   sender: Address; // Alamat wallet pengirim (employer)
   snapshotTime: bigint; // Waktu snapshot terakhir
@@ -145,12 +147,21 @@ export const useEmployeeStreamDetail = (streamId: bigint) => {
     },
   });
 
+  // Mendapatkan symbol token
+  const { symbol: tokenSymbol } = useGetTokenSymbol(
+    streamData?.token as `0x${string}`
+  );
+
   // Format data stream jika tersedia
   const streamDetail: StreamDetail | null = streamData
     ? {
         balance:
           BigInt(formatUnits(streamData.balance, streamData.tokenDecimals)) ||
           0n,
+        balanceFormated: formatUnits(
+          streamData.balance,
+          streamData.tokenDecimals
+        ),
         ratePerSecond: streamData.ratePerSecond || 0n,
         sender: streamData.sender || "0x0",
         snapshotTime: BigInt(streamData.snapshotTime || 0),
@@ -162,6 +173,42 @@ export const useEmployeeStreamDetail = (streamId: bigint) => {
         snapshotDebtScaled: streamData.snapshotDebtScaled || 0n,
       }
     : null;
+
+  // Fungsi untuk menghitung rate per bulan dari rate per detik
+  const calculateRatePerMonth = (
+    ratePerSecond: bigint,
+    tokenDecimals: number
+  ): number => {
+    if (!ratePerSecond) return 0;
+    const secondsPerMinute = 60n;
+    const minutesPerHour = 60n;
+    const hoursPerDay = 24n;
+    const daysPerMonth = 30n;
+
+    const ratePerMonth =
+      ratePerSecond *
+      secondsPerMinute *
+      minutesPerHour *
+      hoursPerDay *
+      daysPerMonth;
+    return Number(formatUnits(ratePerMonth, tokenDecimals));
+  };
+
+  // Fungsi untuk menentukan status berdasarkan field status, isPaused, dan isVoided
+  const getStreamStatus = (): "Active" | "Paused" | "Voided" => {
+    if (isVoided) return "Voided";
+    if (isPaused) return "Paused";
+    return "Active";
+  };
+
+  // Menghitung nilai-nilai yang diperlukan
+  const ratePerMonth = streamDetail
+    ? calculateRatePerMonth(
+        streamDetail.ratePerSecond,
+        streamDetail.tokenDecimals
+      )
+    : 0;
+  const streamStatus = getStreamStatus();
 
   // Menggabungkan semua loading status
   const loading =
@@ -195,9 +242,14 @@ export const useEmployeeStreamDetail = (streamId: bigint) => {
     streamDetail,
     withdrawableAmount: withdrawableAmount || null,
     balance: balance || null,
+    balanceFormated: streamDetail?.balanceFormated,
     status: status !== undefined ? Number(status) : null,
+    streamStatus,
+
     isPaused: isPaused || null,
     isVoided: isVoided || null,
+    tokenSymbol: tokenSymbol || "USDT", // Default ke USDT jika symbol tidak tersedia
+    ratePerMonth,
     loading,
     error,
     refetch,

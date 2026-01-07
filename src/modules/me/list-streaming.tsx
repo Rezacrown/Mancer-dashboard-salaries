@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import {
   Activity,
   Search,
@@ -11,18 +10,18 @@ import {
 import {
   type EmployeeStream,
   useGetEmployeeStreams,
-  useGetStreamsRecepientId,
 } from "@/libs/services/employee";
 import { useStreamStore } from "@/libs/stores/stream-store";
 import { formatAddress } from "@/libs/utils";
+import { useState } from "react";
 
 export default function List_streaming() {
+  const mockAddress = "0x8Df44cbEae7E9227DE84947d9C350b18A1b5a04b";
+  const [limit, setLimit] = useState(5);
+
   const { activeStreamId, setActiveStreamId } = useStreamStore();
 
-  const mockAddress = "0x8Df44cbEae7E9227DE84947d9C350b18A1b5a04b";
-
-  // HERE
-  const { streams, loading } = useGetEmployeeStreams(mockAddress);
+  const { streams, loading } = useGetEmployeeStreams(mockAddress, limit);
 
   // Function to map stream data to table format
   const mapStreamToTableData = (stream: EmployeeStream, index: number) => {
@@ -64,9 +63,9 @@ export default function List_streaming() {
   };
 
   // Map streams to table format
-  const tableStreams = streams.map((stream, index) =>
-    mapStreamToTableData(stream, index)
-  );
+  const tableStreams = streams.map((stream, index) => {
+    return mapStreamToTableData(stream, index);
+  });
 
   return (
     <div className="mb-8">
@@ -184,7 +183,10 @@ export default function List_streaming() {
           </table>
         </div>
         <div className="bg-gray-50/50 px-6 py-3 border-t border-gray-100 text-center">
-          <button className="text-sm text-slate-500 font-medium hover:text-red-600 transition">
+          <button
+            onClick={() => setLimit((limit) => limit + 5)}
+            className="text-sm text-slate-500 font-medium hover:text-red-600 transition"
+          >
             View All History
           </button>
         </div>
