@@ -14,7 +14,7 @@ const EmployeeDashboardPage = async () => {
       <PageT_title />
 
       {/* Top Grid */}
-      <Top_grid streamedBalance={streamedBalance} withdrawable={withdrawable} />
+      <Top_grid />
 
       <List_streaming />
 

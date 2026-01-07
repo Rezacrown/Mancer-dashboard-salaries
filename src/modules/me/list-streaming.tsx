@@ -14,14 +14,20 @@ import {
 import { useStreamStore } from "@/libs/stores/stream-store";
 import { formatAddress } from "@/libs/utils";
 import { useState } from "react";
+import { useWallet } from "@/libs/hooks";
 
 export default function List_streaming() {
-  const mockAddress = "0x8Df44cbEae7E9227DE84947d9C350b18A1b5a04b";
+  const { address: userAddr } = useWallet();
+
   const [limit, setLimit] = useState(5);
+  const [initialLimit] = useState(5);
 
   const { activeStreamId, setActiveStreamId } = useStreamStore();
 
-  const { streams, loading } = useGetEmployeeStreams(mockAddress, limit);
+  const { streams, allStreams, totalCount, loading } = useGetEmployeeStreams(
+    userAddr!,
+    limit
+  );
 
   // Function to map stream data to table format
   const mapStreamToTableData = (stream: EmployeeStream, index: number) => {
@@ -182,13 +188,36 @@ export default function List_streaming() {
             </tbody>
           </table>
         </div>
-        <div className="bg-gray-50/50 px-6 py-3 border-t border-gray-100 text-center">
-          <button
-            onClick={() => setLimit((limit) => limit + 5)}
-            className="text-sm text-slate-500 font-medium hover:text-red-600 transition"
-          >
-            View All History
-          </button>
+        <div className="bg-gray-50/50 px-6 py-3 border-t border-gray-100">
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-slate-500">
+              Showing {Math.min(limit, totalCount)} of {totalCount} streams
+            </div>
+            <div>
+              {limit < totalCount && (
+                <button
+                  onClick={() =>
+                    setLimit((prevLimit) => Math.min(prevLimit + 5, totalCount))
+                  }
+                  className="text-sm text-slate-500 font-medium hover:text-red-600 transition"
+                >
+                  Load More
+                </button>
+              )}
+              {limit > initialLimit && (
+                <button
+                  onClick={() =>
+                    setLimit((prevLimit) =>
+                      Math.max(prevLimit - 5, initialLimit)
+                    )
+                  }
+                  className="text-sm text-slate-500 font-medium hover:text-red-600 transition ml-2"
+                >
+                  Show Less
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

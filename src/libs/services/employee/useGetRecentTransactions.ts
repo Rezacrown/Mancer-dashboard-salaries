@@ -14,7 +14,7 @@
 "use client";
 import { CONFIG } from "@/constants/config";
 import { useEffect, useState } from "react";
-import { Address, formatUnits, parseAbiItem } from "viem";
+import { Address, formatUnits, parseAbiItem, erc20Abi } from "viem";
 import { usePublicClient } from "wagmi";
 
 // Tipe data untuk State Transaksi yang diperluas
@@ -29,6 +29,7 @@ export type TransactionHistory = {
   blockNumber: bigint;
   amount?: string; // Formatted amount
   token?: Address;
+  tokenSymbol?: string; // Token symbol yang dinamis
   timestamp?: number; // Optional, perlu fetch block manual jika ingin akurat
   rawAmount: bigint;
   streamId?: bigint;
@@ -143,6 +144,7 @@ export const useGetRecentTransactions = (addr: Address) => {
           hash: log.transactionHash,
           blockNumber: log.blockNumber,
           token: log.args.token,
+          tokenSymbol: "", // Akan diisi nanti
           rawAmount: log.args.withdrawAmount || 0n,
           amount: "- " + formatUnits(log.args.withdrawAmount || 0n, 18), // Asumsi 18 decimals, sesuaikan jika beda token
           streamId: log.args.streamId,
@@ -154,6 +156,7 @@ export const useGetRecentTransactions = (addr: Address) => {
         hash: log.transactionHash,
         blockNumber: log.blockNumber,
         token: log.args.token,
+        tokenSymbol: "", // Akan diisi nanti
         rawAmount: log.args.ratePerSecond || 0n,
         amount: "+ " + formatUnits(log.args.ratePerSecond || 0n, 18),
         streamId: log.args.streamId,
@@ -202,8 +205,38 @@ export const useGetRecentTransactions = (addr: Address) => {
         ...formattedVoids,
       ].sort((a, b) => Number(b.blockNumber) - Number(a.blockNumber));
 
-      // (Opsional) Limit hanya ambil 10 transaksi terakhir agar UI tidak berat
-      setTransactions(allActivity.slice(0, 10));
+      // 5. Ambil token symbol untuk setiap transaksi yang memiliki token
+      const transactionsWithTokenSymbols = await Promise.all(
+        allActivity.slice(0, 10).map(async (tx) => {
+          // Jika transaksi memiliki token address, ambil token symbol
+          if (tx.token) {
+            try {
+              const tokenSymbol = await publicClient.readContract({
+                address: tx.token,
+                abi: erc20Abi,
+                functionName: "symbol",
+              });
+              return {
+                ...tx,
+                tokenSymbol: (tokenSymbol as string) || "ETH",
+              };
+            } catch (error) {
+              console.error("Error fetching token symbol:", error);
+              return {
+                ...tx,
+                tokenSymbol: "ETH", // Default ke ETH jika gagal mengambil symbol
+              };
+            }
+          }
+          return {
+            ...tx,
+            tokenSymbol: "ETH", // Default ke ETH jika tidak ada token address
+          };
+        })
+      );
+
+      // Set transaksi dengan token symbol
+      setTransactions(transactionsWithTokenSymbols);
     } catch (error) {
       console.error("Error fetching transactions:", error);
       setError("Gagal mengambil riwayat transaksi. Silakan coba lagi.");

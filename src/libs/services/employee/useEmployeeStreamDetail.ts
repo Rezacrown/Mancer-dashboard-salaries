@@ -22,7 +22,7 @@ import { useGetTokenSymbol } from "./useGetTokenSymbol";
  * Interface untuk detail stream yang lengkap
  */
 export interface StreamDetail {
-  balance: bigint; // Sisa balance dalam stream
+  balance: number; // Sisa balance dalam stream
   balanceFormated: string; // formated Sisa balance dalam stream
   ratePerSecond: bigint; // Rate aliran gaji per detik
   sender: Address; // Alamat wallet pengirim (employer)
@@ -156,8 +156,8 @@ export const useEmployeeStreamDetail = (streamId: bigint) => {
   const streamDetail: StreamDetail | null = streamData
     ? {
         balance:
-          BigInt(formatUnits(streamData.balance, streamData.tokenDecimals)) ||
-          0n,
+          Number(formatUnits(streamData.balance, streamData.tokenDecimals)) ||
+          0,
         balanceFormated: formatUnits(
           streamData.balance,
           streamData.tokenDecimals
@@ -210,6 +210,12 @@ export const useEmployeeStreamDetail = (streamId: bigint) => {
     : 0;
   const streamStatus = getStreamStatus();
 
+  // formated withdrawable amount
+  const withdrawableAmountFormated =
+    withdrawableAmount && streamDetail
+      ? formatUnits(withdrawableAmount, streamDetail?.tokenDecimals || 18)
+      : "";
+
   // Menggabungkan semua loading status
   const loading =
     isStreamLoading ||
@@ -240,7 +246,8 @@ export const useEmployeeStreamDetail = (streamId: bigint) => {
 
   return {
     streamDetail,
-    withdrawableAmount: withdrawableAmount || null,
+    withdrawableAmount: withdrawableAmount || 0,
+    withdrawableAmountFormated: withdrawableAmountFormated,
     balance: balance || null,
     balanceFormated: streamDetail?.balanceFormated,
     status: status !== undefined ? Number(status) : null,

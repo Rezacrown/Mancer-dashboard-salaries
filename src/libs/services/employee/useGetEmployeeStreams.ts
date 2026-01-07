@@ -54,6 +54,7 @@ export interface EmployeeStream {
 export const useGetEmployeeStreams = (address: Address, limit: number = 5) => {
   const publicClient = usePublicClient();
   const [streams, setStreams] = useState<EmployeeStream[]>([]);
+  const [allStreams, setAllStreams] = useState<EmployeeStream[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -156,6 +157,7 @@ export const useGetEmployeeStreams = (address: Address, limit: number = 5) => {
         })
       );
 
+      setAllStreams(enrichedStreams);
       setStreams(enrichedStreams.slice(0, limit));
     } catch (err) {
       console.error("Error fetching employee streams:", err);
@@ -176,5 +178,19 @@ export const useGetEmployeeStreams = (address: Address, limit: number = 5) => {
     return () => clearInterval(interval);
   }, [address, publicClient]);
 
-  return { streams, loading, error, refetch: fetchStreams };
+  // Update streams yang ditampilkan ketika limit berubah
+  useEffect(() => {
+    if (allStreams.length > 0) {
+      setStreams(allStreams.slice(0, limit));
+    }
+  }, [limit, allStreams]);
+
+  return {
+    streams,
+    allStreams,
+    totalCount: allStreams.length,
+    loading,
+    error,
+    refetch: fetchStreams,
+  };
 };

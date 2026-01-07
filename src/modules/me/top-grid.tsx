@@ -9,12 +9,7 @@ import { useStreamStore } from "@/libs/stores/stream-store";
 import { useWallet } from "@/libs/hooks";
 import { formatAddress } from "@/libs/utils";
 
-interface Props {
-  streamedBalance: number;
-  withdrawable: number;
-}
-
-export default function Top_grid({ streamedBalance, withdrawable }: Props) {
+export default function Top_grid() {
   const { activeStreamId } = useStreamStore();
   const streamId = activeStreamId || 0n; // Fallback to 0n if no active stream is selected
   const {
@@ -25,6 +20,7 @@ export default function Top_grid({ streamedBalance, withdrawable }: Props) {
     loading,
     error,
     withdrawableAmount,
+    withdrawableAmountFormated,
     balance,
     balanceFormated,
   } = useEmployeeStreamDetail(streamId);
@@ -248,7 +244,7 @@ export default function Top_grid({ streamedBalance, withdrawable }: Props) {
               </div>
               <p className="text-lg font-bold">
                 {debt.toLocaleString("en-US", {
-                  maximumFractionDigits: 2,
+                  minimumFractionDigits: 2,
                 })}{" "}
                 <span className="text-xs text-gray-400 font-normal">
                   {tokenSymbol}
@@ -264,7 +260,7 @@ export default function Top_grid({ streamedBalance, withdrawable }: Props) {
               </div>
               <p className="text-lg font-bold">
                 {withdrawn.toLocaleString("en-US", {
-                  maximumFractionDigits: 2,
+                  minimumFractionDigits: 2,
                 })}{" "}
                 <span className="text-xs text-gray-400 font-normal">
                   {tokenSymbol}
@@ -279,9 +275,9 @@ export default function Top_grid({ streamedBalance, withdrawable }: Props) {
                 </span>
               </div>
               <p className="text-xl font-bold text-[#F9140D] tabular-nums wrap-break-word">
-                {withdrawableAmount
-                  ? Number(withdrawableAmount).toLocaleString("en-US", {
-                      minimumFractionDigits: 0,
+                {Number(withdrawableAmountFormated)
+                  ? Number(withdrawableAmountFormated).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
                     })
                   : "0"}
                 <span className="text-xs text-gray-400 font-normal ml-1">

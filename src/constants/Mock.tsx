@@ -1,7 +1,7 @@
 // --- Dummy Data ---
 export const USER_PROFILE = {
   name: "Melinda Aulia",
-  address: "0xA1B2...C3D4E5",
+  address: "0x8Df44cbEae7E9227DE84947d9C350b18A1b5a04b",
   avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Melinda",
 };
 
