@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import SidebarItem from "./SidebarItem";
+import RoleTabs from "./RoleTabs";
 
 import {
   Briefcase,
@@ -29,21 +30,38 @@ import { useWindowWidth } from "@/libs/hooks/useWindowWidth";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { Address } from "viem";
 
+/**
+ * Sidebar Component
+ *
+ * Komponen ini bertanggung jawab untuk:
+ * 1. Menampilkan navigasi sidebar
+ * 2. Menampilkan RoleTabs component
+ * 3. Menampilkan menu items sesuai dengan activeRole
+ *
+ * Perbaikan yang telah dilakukan:
+ * - Menghapus useEffect duplikasi untuk mencegah race condition
+ * - Logic sinkronisasi URL-role sekarang hanya ada di RoleTabs.tsx
+ * - Tambahkan logging untuk debugging
+ */
 const Sidebar = () => {
   const { address } = useWallet();
   const router = useRouter();
   const pathname = usePathname();
   const width = useWindowWidth();
 
-  const { sidebarIsOpen, setSidebarOpen } = useMenuStore();
+  const { sidebarIsOpen, setSidebarOpen, activeRole, setActiveRole } =
+    useMenuStore();
+
+  console.log("Sidebar render:", { activeRole, pathname });
 
   const [copied, setCopied] = useState(false);
 
   // here
-  const isEmployer = false;
+  const isEmployer = activeRole === "employer";
 
   const getActiveMenu = (path: string): boolean => {
-    return pathname == path;
+    // Handle exact match and also check for subpaths
+    return pathname === path || pathname.startsWith(path + "/");
   };
 
   const handleCopyAddress = async (addr: Address) => {
@@ -62,6 +80,9 @@ const Sidebar = () => {
   };
 
   const isOpen = sidebarIsOpen || (width && width > 768);
+
+  // Hapus useEffect dari Sidebar karena sudah dihandle di RoleTabs
+  // Ini mencegah duplikasi logika dan potensi race condition
 
   return (
     <>
@@ -116,6 +137,9 @@ const Sidebar = () => {
             </div>
           )}
         </div>
+
+        {/* Role Tabs */}
+        <RoleTabs />
 
         {/* navigation item */}
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
@@ -174,6 +198,7 @@ function EmployeeMenu({
         active={getActiveMenu("/me")}
         icon={Wallet}
         label="Salary Balance"
+        onClick={() => router.push("/me")}
       />
       <SidebarItem icon={FileText} label="Course" />
     </>

@@ -1,24 +1,12 @@
 "use client";
 import Card from "@/components/shared/Card";
-import {
-  PlusCircle,
-  Users,
-  DollarSign,
-  Wallet,
-  FileText,
-  PauseCircle,
-  PlayCircle,
-  Settings,
-  RefreshCw,
-  AlertCircle,
-} from "lucide-react";
+import { PlusCircle, FileText, RefreshCw, AlertCircle } from "lucide-react";
 
 import Badge from "@/components/shared/Badge";
 import { useRouter } from "next/navigation";
 import { Address } from "viem";
 import {
   EmployerStream,
-  useEmployerStats,
   useGetEmployerStreams,
 } from "@/libs/services/employer";
 import { useCalculateMonthlyRate } from "@/libs/hooks/useCalculateMonthlyRate";
@@ -28,7 +16,9 @@ const EmployerStreamList = () => {
   const router = useRouter();
   const { address } = useWallet();
 
-  const mockAddr = "0x62B969EB63bE8E9c9622ca1E096675360F14859A" as Address;
+  const mockAddr = true
+    ? address
+    : ("0x62B969EB63bE8E9c9622ca1E096675360F14859A" as Address);
 
   const { calculateMonthlyRate } = useCalculateMonthlyRate();
 
