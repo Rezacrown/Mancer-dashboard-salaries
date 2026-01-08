@@ -146,7 +146,9 @@ export const useGetRecentTransactions = (addr: Address) => {
           token: log.args.token,
           tokenSymbol: "", // Akan diisi nanti
           rawAmount: log.args.withdrawAmount || 0n,
-          amount: "- " + formatUnits(log.args.withdrawAmount || 0n, 18), // Asumsi 18 decimals, sesuaikan jika beda token
+          amount: `- ${Number(
+            formatUnits(log.args.withdrawAmount || 0n, 18)
+          ).toFixed(5)}`, // Asumsi 18 decimals, sesuaikan jika beda token
           streamId: log.args.streamId,
         })
       );
@@ -158,7 +160,9 @@ export const useGetRecentTransactions = (addr: Address) => {
         token: log.args.token,
         tokenSymbol: "", // Akan diisi nanti
         rawAmount: log.args.ratePerSecond || 0n,
-        amount: "+ " + formatUnits(log.args.ratePerSecond || 0n, 18),
+        amount: `+ ${Number(
+          formatUnits(log.args.ratePerSecond || 0n, 18)
+        ).toFixed(5)}`,
         streamId: log.args.streamId,
         sender: log.args.sender,
       }));

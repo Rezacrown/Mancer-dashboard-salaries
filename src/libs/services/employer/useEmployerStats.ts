@@ -4,6 +4,7 @@ import { CONFIG } from "@/constants/config";
 import { Address } from "viem";
 import { useReadContract } from "wagmi";
 import { formatUnits } from "viem";
+import { useGetTokenSymbol } from "../employee";
 
 export interface EmployerStats {
   totalStreams: number;

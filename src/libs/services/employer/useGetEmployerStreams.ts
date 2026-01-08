@@ -1,7 +1,7 @@
 "use client";
 
 import { CONFIG } from "@/constants/config";
-import { Address } from "viem";
+import { Address, formatUnits } from "viem";
 import { usePublicClient } from "wagmi";
 import { useEffect, useState } from "react";
 
@@ -10,8 +10,11 @@ export interface EmployerStream {
   sender: Address;
   recipient: Address;
   ratePerSecond: bigint;
+  ratePerSecondFormated: string;
   token: Address;
   transferable: boolean;
+  balance: bigint;
+  balanceFormated: string;
 }
 
 interface UseGetEmployerStreamsResult {
@@ -62,16 +65,36 @@ export const useGetEmployerStreams = (
         toBlock: "latest",
       });
 
-      const employerStreams: EmployerStream[] = logs.map((log) => ({
-        streamId: log.args.streamId as bigint,
-        sender: log.args.sender as Address,
-        recipient: log.args.recipient as Address,
-        ratePerSecond: log.args.ratePerSecond as bigint,
-        token: log.args.token as Address,
-        transferable: log.args.transferable as boolean,
-      }));
+      // Fetch balance for each stream
+      const streamsWithBalance = await Promise.all(
+        logs.map(async (log) => {
+          const streamId = log.args.streamId as bigint;
 
-      setStreams(employerStreams);
+          // Get balance for this stream using getBalance function from contract
+          const balanceData = await publicClient.readContract({
+            address: CONFIG.contracts.salary_contract_mancer,
+            abi: CONFIG.abi.salary_mancer_abi,
+            functionName: "getBalance",
+            args: [streamId],
+          });
+
+          return {
+            streamId: log.args.streamId as bigint,
+            sender: log.args.sender as Address,
+            recipient: log.args.recipient as Address,
+            ratePerSecond: log.args.ratePerSecond as bigint,
+            ratePerSecondFormated: log.args.ratePerSecond
+              ? formatUnits(log.args.ratePerSecond, 18)
+              : "",
+            token: log.args.token as Address,
+            transferable: log.args.transferable as boolean,
+            balance: balanceData as bigint,
+            balanceFormated: balanceData ? formatUnits(balanceData, 18) : "",
+          };
+        })
+      );
+
+      setStreams(streamsWithBalance);
     } catch (err) {
       console.error("Error fetching employer streams:", err);
       setError("Gagal mengambil data stream. Silakan coba lagi.");

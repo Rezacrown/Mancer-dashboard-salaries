@@ -5,9 +5,6 @@ import PageT_title from "@/modules/me/page-title";
 import List_streaming from "@/modules/me/list-streaming";
 
 const EmployeeDashboardPage = async () => {
-  const streamedBalance = 11377.68;
-  const withdrawable = 11120.92;
-
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Page Title */}
